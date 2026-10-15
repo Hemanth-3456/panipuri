@@ -648,7 +648,7 @@
         <div class="gallery-grid">
             <!-- Memory 1 -->
             <div class="memory-card">
-                <img src="first.jpg.jpeg" alt="Memory"
+                <img src="./first.jpg.jpeg" alt="Memory"
                     class="memory-image">
                 <div class="memory-hover-overlay">
                     <p class="hover-message">There's something beautiful about you that even a mirror can't capture. ❤️✨</p>
@@ -656,7 +656,7 @@
             </div>
             <!-- Memory 2 -->
             <div class="memory-card">
-                <img src="second.jpg.jpeg" alt="Memory"
+                <img src="./second.jpg.jpeg" alt="Memory"
                     class="memory-image">
                 <div class="memory-hover-overlay">
                     <p class="hover-message">Some people don't need to try to shine. They just do, naturally. ✨</p>
@@ -664,7 +664,7 @@
             </div>
             <!-- Memory 3 -->
             <div class="memory-card">
-                <img src="third.jpg.jpeg" alt="Memory"
+                <img src="./third.jpg.jpeg" alt="Memory"
                     class="memory-image">
                 <div class="memory-hover-overlay">
                     <p class="hover-message">My favorite smile in the world 💖</p>
@@ -672,7 +672,7 @@
             </div>
             <!-- Memory 4 -->
             <div class="memory-card">
-                <img src="fourth.jpg.jpeg" alt="Memory"
+                <img src="./fourth.jpg.jpeg" alt="Memory"
                     class="memory-image">
                 <div class="memory-hover-overlay">
                     <p class="hover-message">Even on your quietest days, you deserve all the love and care in the world. 🤍</p>
@@ -680,7 +680,7 @@
             </div>
             <!-- Memory 5 -->
             <div class="memory-card">
-                <img src="fifth.jpg.jpeg" alt="Memory"
+                <img src="./fifth.jpg.jpeg" alt="Memory"
                     class="memory-image">
                 <div class="memory-hover-overlay">
                     <p class="hover-message">If happiness had a face, I think it would look a little like your smile. 💖</p>
@@ -688,7 +688,7 @@
             </div>
             <!-- Memory 6 -->
             <div class="memory-card">
-                <img src="six.jpg.jpeg" alt="Memory"
+                <img src="./six.jpg.jpeg" alt="Memory"
                     class="memory-image">
                 <div class="memory-hover-overlay">
                     <p class="hover-message">Look how far this little girl has come. May life always protect her beautiful heart. 🥹❤️</p>
@@ -700,13 +700,22 @@
         </div>
     </section>
 
-    <audio id="birthday-audio" loop>
+    <audio id="birthday-audio" loop preload="auto">
+        <source src="./Naa%20Gundello%20-%20SenSongsmp3.Co.mp3" type="audio/mpeg">
+        <source src="Naa%20Gundello%20-%20SenSongsmp3.Co.mp3" type="audio/mpeg">
+        <source src="./Naa Gundello - SenSongsmp3.Co.mp3" type="audio/mpeg">
         <source src="Naa Gundello - SenSongsmp3.Co.mp3" type="audio/mpeg">
     </audio>
 
     <script>
         // --- Navigation Logic ---
         function transitionTo(pageId) {
+            // Prime audio on user interaction so browser autoplay policies allow smooth playback
+            const audio = document.getElementById('birthday-audio');
+            if (audio && audio.paused && audio.readyState === 0) {
+                audio.load();
+            }
+
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             const target = document.getElementById(pageId);
             target.classList.add('active');
@@ -769,7 +778,16 @@
                 celebStep = 2;
             } else if (celebStep === 2) {
                 const audio = document.getElementById('birthday-audio');
-                audio.play().catch(() => { });
+                if (audio) {
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log("Audio playback started successfully.");
+                        }).catch((error) => {
+                            console.error("Audio playback error:", error);
+                        });
+                    }
+                }
                 hint.innerText = "Let the colors fly!";
                 btn.innerText = "🎈 Fly Balloons";
                 celebStep = 3;
@@ -863,6 +881,30 @@
 
         window.onload = () => {
             initFairyLights();
+
+            // Audio error monitoring
+            const audio = document.getElementById('birthday-audio');
+            if (audio) {
+                audio.addEventListener('error', () => {
+                    console.error("Audio error encountered:", audio.error);
+                });
+            }
+
+            // Resilient image loading with fallback support
+            document.querySelectorAll('.memory-image').forEach(img => {
+                img.addEventListener('error', function () {
+                    console.warn('Image failed to load, attempting fallback:', this.src);
+                    if (!this.dataset.fallbackTried) {
+                        this.dataset.fallbackTried = '1';
+                        const currentSrc = this.getAttribute('src');
+                        if (currentSrc.endsWith('.jpg.jpeg')) {
+                            this.src = currentSrc.replace(/\.jpg\.jpeg$/, '.jpg');
+                        } else if (currentSrc.endsWith('.jpeg')) {
+                            this.src = currentSrc.replace(/\.jpeg$/, '.jpg');
+                        }
+                    }
+                });
+            });
         };
     </script>
 </body>
